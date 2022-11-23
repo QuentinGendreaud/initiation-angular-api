@@ -6,7 +6,7 @@
         "habilitation": 1,
         "login": "guest",
         "password": "guest",
-        "activation": false
+        "activation": true
     },
     {
         "id": 2,
@@ -15,6 +15,6 @@
         "habilitation": 0,
         "login": "root",
         "password": "root",
-        "activation": false
+        "activation": true
     }
 ]

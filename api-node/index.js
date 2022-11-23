@@ -7,6 +7,14 @@ const teams = require('./data/teams.json');
 const matchs = require('./data/matchs.json');
 const pronostics = require('./data/pronostics.json');
 
+// Variables to set next avaiallableID
+let nextElementId = {
+    user: 100,
+    team: 100,
+    match: 100,
+    pronostic: 100,
+}
+
 // Init node Server
 const app = express();
 
@@ -15,16 +23,15 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
-// Api Method definition
+/**
+ * User's routes
+ */
 app.get('/users', (req, res) => {
     res.status(200).json(users)
 });
 
-/**
- * User's routes
- */
-app.put('/users/:id/habilitation', (req, res) => {
-    const id = parseInt(req.params.id);
+app.put('/users/:userId/habilitation', (req, res) => {
+    const id = parseInt(req.params.userId);
     const userIndex = users.findIndex(userElement => userElement.id === id);
     if (userIndex !== -1) {
         users[userIndex].habilitation = req.body.habilitation;
@@ -33,8 +40,18 @@ app.put('/users/:id/habilitation', (req, res) => {
 });
 
 app.post('/user', (req, res) => {
-    users.push(req.body);
-    res.status(200).json(users);
+    const createdUser = {
+        id: nextElementId.user,
+        firstname: req.body.firstname,
+        lastname: req.body.lastname,
+        habilitation: 2,
+        login: req.body.login,
+        password: req.body.password,
+        activation: true
+    }
+    nextElementId.user ++;
+    users.push(createdUser);
+    res.status(200).json(createdUser);
 });
 
 /**
@@ -57,8 +74,14 @@ app.get('/teams', (req, res) => {
 });
 
 app.post('/teams', (req, res) => {
-    teams.push(req.body);
-    res.status(200).json(req.body);
+    const createdTeam = {
+        id: nextElementId.team,
+        name: req.body.name,
+        flagUrl: req.body.flagUrl
+    }
+    nextElementId.team ++;
+    teams.push(createdTeam);
+    res.status(200).json(createdTeam);
 });
 
 app.put('/teams', (req, res) => {
@@ -88,9 +111,57 @@ app.get('/matchs', (req, res) => {
     res.status(200).json(matchs)
 });
 
+app.get('/matchs/:matchId/pronostics', (req, res) => {
+    let selectedMatch = matchs.find((match) => match.id === parseInt(req.params.matchId, 10));
+    if (selectedMatch) {
+        let matchPronostics = pronostics.filter((prono) => prono.matchId === selectedMatch.id);
+        selectedMatch.teamA = teams.find((team) => team.id === selectedMatch.teamAId);
+        selectedMatch.teamB = teams.find((team) => team.id === selectedMatch.teamBId);
+        selectedMatch.pronostics = matchPronostics.map((pronostic) => {
+            const pronoUser = users.find((user) => user.id === pronostic.userId);
+            return {
+                ...pronostic,
+               displayedUserName: pronoUser ? `${pronoUser.firstname} ${pronoUser.lastname}` : '',
+            }
+        });
+        res.status(200).json(selectedMatch)
+    } else {
+        res.status(204).json();
+    }
+});
+
+app.get('/matchs/pronostics/:userId', (req, res) => {
+    const userId = parseInt(req.params.userId, 10);
+    const user = users.find((user) => user.id === userId);
+    
+    if (user) {
+        const completedMatchs = [...matchs];
+        completedMatchs.map((match) => {
+            const pronostic = pronostics.find((prono) => prono.matchId === match.id && prono.userId === userId)
+            if (pronostic) {
+                match.pronostics = [pronostic];
+            } else {
+                match.pronostics = []
+            }
+        });
+        res.status(200).json(completedMatchs);
+    } else {
+        res.status(204).json();
+    }
+});
+
 app.post('/matchs', (req, res) => {
-    matchs.push(req.body);
-    res.status(200).json(req.body);
+    const createdMatch = {
+        id: nextElementId.match,
+        teamAId: req.body.teamAId,
+        teamBId: req.body.teamBId,
+        startDate: req.body.startDate,
+        scoreTeamA: 0,
+        scoreTeamB: 0
+    }
+    nextElementId.match ++;
+    matchs.push(createdMatch);
+    res.status(200).json(createdMatch);
 });
 
 app.put('/matchs', (req, res) => {
@@ -133,8 +204,15 @@ app.get('/pronostics/:userId', (req, res) => {
 });
 
 app.post('/pronostics', (req, res) => {
-    pronostics.push(req.body);
-    res.status(200).json(req.body);
+    const createdProno = {
+        id: nextElementId.pronostic,
+        userId: req.body.userId,
+        matchId: req.body.matchId,
+        choice: req.body.choice
+    }
+    nextElementId.pronostic ++;
+    pronostics.push(createdProno);
+    res.status(200).json(createdProno);
 });
 
 app.put('/pronostics', (req, res) => {

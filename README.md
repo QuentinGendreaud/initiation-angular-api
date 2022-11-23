@@ -127,9 +127,9 @@ Au chargement de l'écran, l'affichage devra mettre en avant les pronostiques d�
 - Card Material: https://material.angular.io/components/card/overview
 
 ### Routes Api à utiliser
-- [GET] "/pronostics"
-- [GET] "/pronostics/:userId"
-- [PUT] "/pronostics" **Work In Progress...**
+- [GET] "/matchs/pronostics/:userId"
+- [PUT] "/pronostics"
+- [POST] "/pronostics"
 
 ## Etape n°6 - Mise en place du lazy loading (module admin / module pronostique)
 Cette partie consiste en une optimisation de performance de l'application.
