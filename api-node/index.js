@@ -1,5 +1,5 @@
 const express = require('express');
-// const bodyParser = require('body-parser')
+const cors = require('cors');
 
 // Load datas
 const users = require('./data/users.json');
@@ -19,9 +19,9 @@ let nextElementId = {
 const app = express();
 
 // Init Middleware
-// app.use(bodyParser.json());
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
+app.use(cors());
 
 /**
  * User's routes
@@ -60,7 +60,7 @@ app.post('/user', (req, res) => {
 app.post('/login', (req, res) => {
     const loggedUser = users.find((user) => user.login === req.body.login && user.password === req.body.password);
     if (loggedUser) {
-        res.status(200).json(users);
+        res.status(200).json(loggedUser);
     } else {
         res.status(204).json();
     }
