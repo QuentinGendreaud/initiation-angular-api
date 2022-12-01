@@ -143,6 +143,8 @@ app.get('/matchs/pronostics/:userId', (req, res) => {
             } else {
                 match.pronostics = []
             }
+            match.teamA = teams.find((team) => team.id === match.teamAId);
+            match.teamB = teams.find((team) => team.id === match.teamBId);
         });
         res.status(200).json(completedMatchs);
     } else {
